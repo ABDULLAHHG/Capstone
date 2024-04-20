@@ -1,4 +1,3 @@
 pandas 
 pycaret
-sklearn
 scikit-learn
