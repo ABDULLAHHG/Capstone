@@ -137,7 +137,8 @@ def DataEncoder(df : pd.DataFrame):
     if len(label_encoder_columns)>0:
         for col in label_encoder_columns:
             df = df.join(encode_column(df , col , "one-hot" ))
-    
+            df = df.drop(col , axis = 1)
+
     # implementation for catigorical encoding method 
     if len(catigorical_encoder_columns)>0:
         for col in catigorical_encoder_columns:
@@ -179,7 +180,8 @@ def create_model_And_evaluate_model(df = None , train = None , test = None):
         y_pred = model.predict_model(best_model, data=df)
 
         st.header(" 10 row of Prediction ")
-        st.write(y_pred[[target , "prediction_label" , "prediction_score"]].sample(10))
+        st.write(pd.concat([y_pred[[target]] , y_pred.iloc[:,-2:]]).sample(10))
+
 
     elif upload_option == "Two Files":
         y_true = test[target]
@@ -199,14 +201,15 @@ def create_model_And_evaluate_model(df = None , train = None , test = None):
 
         y_pred = model.predict_model(best_model, data=test, raw_score=True)
         st.header(" 10 row of Prediction ")
-        st.write(y_pred[[target , "prediction_label" , "prediction_score"]].sample(10))
+        st.write(pd.join([y_pred[[target]] , y_pred[:,-2:]]).sample(10))
 
     if SelectModelType == "Regression":
-        st.text("Mean squared error : " , mean_squared_error(y_true, y_pred))
-    
+        # st.text("Mean squared error : " , mean_squared_error(y_true, y_pred))
+        model.plot_model(best_model, plot = 'auc' , display_format="streamlit")
 
     elif SelectModelType == "Classification":
         model.plot_model(best_model , plot = 'confusion_matrix',display_format="streamlit", plot_kwargs = {'percent' : True})
+        model.plot_model(best_model, plot = 'auc' , display_format="streamlit")
         
     else:
         st.text("Choose Model Type")
@@ -228,7 +231,7 @@ if file_uploaded:
         ShowPreprocessingDataset : bool = st.checkbox("Show Preprocessing dataset" , 1)
         if ShowOriginalDataset:
             showData(df)
-        SelectModelType : str = st.selectbox("Choose Model Type",("Regression", "Classification") , 0 if df[target].nunique() > 10 else 1)
+        SelectModelType : str = st.selectbox("Choose Model Type",("Regression", "Classification") , 0 if df[target].nunique() > int(df.shape[0] * 0.01) else 1)
         if st.button("Start"):
             create_model_And_evaluate_model(df = df , train = None , test = None)
 
@@ -236,9 +239,9 @@ if file_uploaded:
 
     if upload_option == "Two Files": 
         selected : str = st.selectbox("Show Train or Test Data" , ["Train Data" , "Test Data"] , 0)
-        SelectModelType : str = st.selectbox("Choose Model Type",("Regression", "Classification") , 0 if df[target].nunique() > 10 else 1)
+        SelectModelType : str = st.selectbox("Choose Model Type",("Regression", "Classification") , 0 if df[target].nunique() > int(train.shape[0] * 0.01) else 1)
         if st.button("Start"):
-            create_model_And_evaluate_model(df = df , train = None , test = None)
+            create_model_And_evaluate_model(df = None , train = train , test = test)
 
         if selected == "Train Data":
             showData(train)
