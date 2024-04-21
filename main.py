@@ -3,6 +3,10 @@ import pandas as pd
 from pycaret.regression import RegressionExperiment
 from pycaret.classification import ClassificationExperiment
 from sklearn.metrics import mean_squared_error
+import numpy as np 
+
+import plotly.graph_objects as go 
+from plotly.subplots import make_subplots 
 
 # pip install pycaret
 
@@ -60,6 +64,62 @@ def encode_column(df , column_name: str, encoding_method: str) -> None:
         raise ValueError(f"Unsupported encoding method: {encoding_method}")
     return df
 
+# vis function 
+
+# Color for Pie plot and Bar plot 
+colors = ['#7c90db', '#92a8d1', '#a5c4e1', '#f7cac9', '#fcbad3', '#e05b6f', '#f8b195', '#f5b971', '#f9c74f', '#ee6c4d', '#c94c4c', '#589a8e', '#a381b5', '#f8961e', '#4f5d75', '#6b5b95', '#9b59b6', '#b5e7a0', '#a2b9bc', '#b2ad7f', '#679436', '#878f99', '#c7b8ea', '#6f9fd8', '#d64161', '#f3722c', '#f9a828', '#ff7b25', '#7f7f7f']
+    
+def subplot(df):
+    column = st.selectbox("Choose a column to view its dist" ,df.columns ,int(np.argmin(df.nunique())))
+    fig = make_subplots(rows=1, cols=2, subplot_titles=('Countplot', 'percentage'), specs=[[{"type": "xy"}, {'type': 'domain'}]])
+
+    # Bar plot
+    fig.add_trace(
+        go.Bar(
+            x=df[column].value_counts().index,
+            y=df[column].value_counts().values,
+            textposition='auto',
+            showlegend=False,
+            marker=dict(
+                color=colors[:len(df[column].value_counts())],  
+                line=dict(color='black', width=2)
+            )
+        ),
+        row=1,
+        col=1
+    )
+
+    # Pie plot 
+    fig.add_trace(
+        go.Pie(
+            labels=df[column].value_counts().index,
+            values=df[column].value_counts().values,
+            hoverinfo='label',
+            textinfo='percent',
+            textposition='auto',
+            marker=dict(
+                colors=colors[:len(df[column].value_counts())],  
+                line=dict(color='black', width=2)
+            )
+        ),
+        row=1,
+        col=2
+    )
+
+    fig.update_layout(
+        title = {'text' : f'Distribution of the {column}',
+                 'y' : 0.9,
+                 'x' : 0.5,
+                 'xanchor' : 'center',
+                  'yanchor' : 'top'},
+                  template = 'plotly_dark')
+    st.plotly_chart(fig)
+
+def pie():
+    catigorical = [col for col in df.select_dtypes(["object" , "category"]).columns if df[col].nunique() < 10]
+    pass
+
+
 
 
 # Sidebar options
@@ -76,6 +136,7 @@ if upload_option == "One File":
 
         # Read Data 
         df = read_data(file)
+        subplot(df)
 
         # Make a user able to choose a Target column
         target = st.selectbox("choose The target variable", df.columns)
