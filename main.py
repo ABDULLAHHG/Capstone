@@ -68,7 +68,8 @@ def encode_column(df , column_name: str, encoding_method: str) -> None:
 
 # Color for Pie plot and Bar plot 
 colors = ['#7c90db', '#92a8d1', '#a5c4e1', '#f7cac9', '#fcbad3', '#e05b6f', '#f8b195', '#f5b971', '#f9c74f', '#ee6c4d', '#c94c4c', '#589a8e', '#a381b5', '#f8961e', '#4f5d75', '#6b5b95', '#9b59b6', '#b5e7a0', '#a2b9bc', '#b2ad7f', '#679436', '#878f99', '#c7b8ea', '#6f9fd8', '#d64161', '#f3722c', '#f9a828', '#ff7b25', '#7f7f7f']
-    
+
+# This project from my repo Simple EDA streamlit wtih some edit 
 def subplot(df):
     column = st.selectbox("Choose a column to view its dist" ,df.columns ,int(np.argmin(df.nunique())))
     fig = make_subplots(rows=1, cols=2, subplot_titles=('Countplot', 'percentage'), specs=[[{"type": "xy"}, {'type': 'domain'}]])
@@ -113,8 +114,9 @@ def subplot(df):
                  'xanchor' : 'center',
                   'yanchor' : 'top'},
                   template = 'plotly_dark')
-    st.plotly_chart(fig)
 
+    st.plotly_chart(fig)
+    
 def pie():
     catigorical = [col for col in df.select_dtypes(["object" , "category"]).columns if df[col].nunique() < 10]
     pass
@@ -265,8 +267,12 @@ def create_model_And_evaluate_model(df = None , train = None , test = None):
         st.write(pd.join([y_pred[[target]] , y_pred[:,-2:]]).sample(10))
 
     if SelectModelType == "Regression":
-        # st.text("Mean squared error : " , mean_squared_error(y_true, y_pred))
-        model.plot_model(best_model, plot = 'auc' , display_format="streamlit")
+        st.text(f"mean square error : {metrics.MSE[0]}")
+        
+        try:
+            model.plot_model(best_model, plot = 'auc' , display_format="streamlit")
+        except:
+            st.warning("Area Under the Curve plot not work")
 
     elif SelectModelType == "Classification":
         model.plot_model(best_model , plot = 'confusion_matrix',display_format="streamlit", plot_kwargs = {'percent' : True})
