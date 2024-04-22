@@ -2,11 +2,11 @@ import streamlit as st
 import pandas as pd
 from pycaret.regression import RegressionExperiment
 from pycaret.classification import ClassificationExperiment
-from sklearn.metrics import mean_squared_error
 import numpy as np 
 
 import plotly.graph_objects as go 
 from plotly.subplots import make_subplots 
+
 
 # pip install pycaret
 
@@ -18,6 +18,10 @@ from plotly.subplots import make_subplots
 # loading sample dataset from pycaret dataset module
 import streamlit as st
 st.sidebar.title("Website Settings")
+
+
+st.header("Simple project Streamlit with pycaret")
+
 
 # These function taken from DataPrepKit they was a methods in it with some edit 
 def read_data(file) -> pd.DataFrame :
@@ -71,7 +75,7 @@ colors = ['#7c90db', '#92a8d1', '#a5c4e1', '#f7cac9', '#fcbad3', '#e05b6f', '#f8
 
 # This project from my repo Simple EDA streamlit wtih some edit 
 def subplot(df):
-    column = st.selectbox("Choose a column to view its dist" ,df.columns ,int(np.argmin(df.nunique())))
+    column = st.selectbox("Choose a column to view its Distribution" ,df.columns ,int(np.argmin(df.nunique())))
     fig = make_subplots(rows=1, cols=2, subplot_titles=('Countplot', 'percentage'), specs=[[{"type": "xy"}, {'type': 'domain'}]])
 
     # Bar plot
@@ -163,6 +167,12 @@ elif upload_option == "Two Files":
 
 def Handle_missing_values():
     # Select the numerical columns and catigorical columns based on datatypes 
+    for col in df.columns:
+        try:
+            df[col] = df[col].astype("float64")
+        except:
+            pass
+            
     numerical_columns = df.select_dtypes(['int64', 'float64']).columns
     categorical_columns = df.select_dtypes(['object']).columns
     
@@ -268,7 +278,7 @@ def create_model_And_evaluate_model(df = None , train = None , test = None):
 
     if SelectModelType == "Regression":
         st.text(f"mean square error : {metrics.MSE[0]}")
-        
+
         try:
             model.plot_model(best_model, plot = 'auc' , display_format="streamlit")
         except:
@@ -291,14 +301,18 @@ if file_uploaded:
         ShowOriginalDataset : bool = st.checkbox("Show Original dataset" , 1)
         if ShowOriginalDataset:
             showData(df)
+
         df = Drop_columns(df)
         df = Handle_missing_values()
         df = DataEncoder(df)
+
         # After Preprocessing
         ShowPreprocessingDataset : bool = st.checkbox("Show Preprocessing dataset" , 1)
         if ShowOriginalDataset:
             showData(df)
+
         SelectModelType : str = st.selectbox("Choose Model Type",("Regression", "Classification") , 0 if df[target].nunique() > int(df.shape[0] * 0.01) else 1)
+        st.text("click `Start` to start build a model")
         if st.button("Start"):
             create_model_And_evaluate_model(df = df , train = None , test = None)
 
