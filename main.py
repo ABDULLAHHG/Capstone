@@ -253,7 +253,7 @@ def create_model_And_evaluate_model(df = None , train = None , test = None):
         y_pred = model.predict_model(best_model, data=df)
 
         st.header(" 10 row of Prediction ")
-        st.write(pd.concat([y_pred[[target]] , y_pred.iloc[:,-2:]]).sample(10))
+        st.write(pd.DataFrame(y_pred[target]).join(y_pred.iloc[:,-2:]).sample(10))
 
 
     elif upload_option == "Two Files":
@@ -274,7 +274,8 @@ def create_model_And_evaluate_model(df = None , train = None , test = None):
 
         y_pred = model.predict_model(best_model, data=test, raw_score=True)
         st.header(" 10 row of Prediction ")
-        st.write(pd.join([y_pred[[target]] , y_pred[:,-2:]]).sample(10))
+        st.write(pd.DataFrame(y_pred[target]).join(y_pred.iloc[:,-2:]).sample(10))
+
 
     if SelectModelType == "Regression":
         st.text(f"mean square error : {metrics.MSE[0]}")
