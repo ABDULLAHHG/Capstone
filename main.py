@@ -286,6 +286,7 @@ def create_model_And_evaluate_model(df = None , train = None , test = None):
             st.warning("Area Under the Curve plot not work")
 
     elif SelectModelType == "Classification":
+        st.subheader("Confusion Matrix")
         model.plot_model(best_model , plot = 'confusion_matrix',display_format="streamlit", plot_kwargs = {'percent' : True})
         model.plot_model(best_model, plot = 'auc' , display_format="streamlit")
         
